@@ -1,0 +1,31 @@
+{
+  "schema": "fiezel-neural-voice-repair-manifest-v2",
+  "date": "2026-08-15",
+  "baselineVersion": "5.19.0",
+  "swRev": "m022-neural-voice-selector-20260815-1",
+  "diagBuild": "m022-1",
+  "changed": [
+    {"path":".github/workflows/quality.yml","sha256":"32c202982bc6f41bf2e03025ddd33329faf6b5df7fd49024cad9754f1016d7f8","bytes":2143},
+    {"path":"analysis/device-retest-checklist.md","sha256":"1d0fff1997671243838f3a96a4b3f657cb73d141dad77f9e0430a541d7faf586","bytes":10803},
+    {"path":"app.js","sha256":"67fa6504c5111996b487fb23ad27cf167e7fd75ccccc443479c82b65d5aa93c6","bytes":180751},
+    {"path":"features/neural-voice/fiezel-diag-panel.js","sha256":"abc48c214c55d4cd1a3e8f1130b78b448cae7d0b0d076b2294dcc4516e6d4774","bytes":11623},
+    {"path":"features/neural-voice/fiezel-neural-voice-audibility-fix.js","sha256":"d79b4b9ed5c6c789bf33d64e8350983239f3e986cbe239c5d2f26eb3e6f8b519","bytes":4817},
+    {"path":"features/neural-voice/fiezel-neural-voice-bootstrap.js","sha256":"185b0041ce236612881651491417d3ab0acadcda649789df6caeff8e2ebb04ed","bytes":18489},
+    {"path":"features/neural-voice/fiezel-neural-voice-config.js","sha256":"2cb50f974a170ec66d5165d8ee92ec4c33c9cd41a5e2da362c673eed1851bbe8","bytes":2472},
+    {"path":"features/neural-voice/fiezel-neural-voice-ios-cache-fix.js","sha256":"e9f5341ebeb6f8d54d9f57653d2c40fcb4f7396b80b660db4b3f92d5bf17aeca","bytes":8478},
+    {"path":"features/neural-voice/fiezel-neural-voice.js","sha256":"e7e6763dde7060cefbea734eed9e406922020cbdc13fc9b4093025b9f6e44379","bytes":6534},
+    {"path":"features/neural-voice/fiezel-web-audio-player.js","sha256":"c2bda3d2b7210a0301e59d3499c90cc94272e5a7c0a7e42a6e25b4f240405ea6","bytes":4336},
+    {"path":"ios-cache-compat-test.js","sha256":"8e6331d09ab07a08806bcb53f7cd64acde1032a65a90bf45aa4555925b80e6ae","bytes":6132},
+    {"path":"neural-voice-audibility-test.js","sha256":"d1237e610c8baf840f89cdca8e9bf8031727293c34552bfd7fd74c755d3d1ddd","bytes":3677},
+    {"path":"neural-voice-test.js","sha256":"0a3f243521d7db9881356279de2716d84889219284a1837d2c41c6bc83c283b9","bytes":18243},
+    {"path":"release-audit.py","sha256":"83c224cd98e53d3d63fbf5cc681ebcf7d37f2f636a516f99783c636ddeff2318","bytes":41374},
+    {"path":"style.css","sha256":"5a329233f7610aa3bfb778254f15a9b18d6243228fe1d5d7fcb9726afbd8dd0e","bytes":38236},
+    {"path":"sw.js","sha256":"1f1d73b9b1153fdb7fea1aae205ee2205cb60124fe16e484bc7bd819c7dbee27","bytes":8602}
+  ],
+  "added": [
+    {"path":"neural-voice-fix-test.js","sha256":"5db6afe70721056eb149fac4515ea220adfe5454ef214209431a95e00b700432","bytes":10057},
+    {"path":"neural-voice-selector-test.js","sha256":"2e4c64f84fa20bb43cc7fe71e29dd0aa9296c4f4dcf536985bc108ad1e110a89","bytes":3414},
+    {"path":"sw-corp-test.js","sha256":"fffe9a2f604825979a3224e803bf4e4b78fba56b9c3e464237f9d7aa879c8b58","bytes":7811}
+  ],
+  "removed": []
+}
