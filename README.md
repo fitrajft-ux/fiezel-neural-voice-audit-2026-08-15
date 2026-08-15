@@ -1,27 +1,26 @@
-# FIEZEL Neural Voice Audit — 2026-08-15
+# FIEZEL Neural Voice Audit Candidate
 
-> **STATUS: NOT RELEASED — DEVICE GATE PENDING**
+**Status: UNRELEASED / RELEASE BLOCKED**
 
-Repository ini adalah snapshot audit/repair terisolasi untuk masalah neural voice FIEZEL. Repository ini **bukan production release** dan tidak boleh diperlakukan sebagai build yang sudah device-verified.
+This snapshot is derived from the owner-provided deployment ZIP. It is an audit-and-repair candidate, not a deployment or a claim of device verification. The original `fitrajft-ux/FIEZEL-APPS` repository was not used as the repair target.
 
-## Hasil audit
+Current verified results:
 
-- Quality workflow: **39/39 PASS**.
-- Code-level repair: selector 6 neural voices, neural-first ketika aset prepared, singleton AudioContext, explicit WebAudio/fallback failures, iOS storage preflight, verified cache progress, dan service-worker cross-origin repair.
-- `version.js` dan `VERSION.json` tidak dinaikkan.
-- Release tetap **BLOCKED** karena belum ada bukti real iPhone / PWA standalone dan aggregate `release-audit.py` belum menuntaskan satu run penuh dalam batas execution environment.
+- all 39 commands in the current `quality.yml`: **PASS**;
+- consolidated source + workflow gates: **46/46 PASS**;
+- `release-audit.py`: **154/0 PASS**;
+- direct vendored Kokoro ONNX/WASM inference: **6/6 voices PASS** with non-empty 24 kHz waveform;
+- release remains **BLOCKED** until the standalone owner iPhone PWA produces audible `kokoro-local` output after cold relaunch and Puter remains functional under the candidate service worker/COEP context.
 
-## Neural voices
+Start with:
 
-Kandidat menyediakan enam pilihan voice lokal: Heart (`af_heart`), Bella (`af_bella`), Nicole (`af_nicole`), Michael (`am_michael`), Emma (`bf_emma`), dan George (`bm_george`). Selector menyimpan pilihan pengguna dan tombol **Uji neural** berjalan dengan fallback browser dinonaktifkan agar browser TTS tidak dapat menyamar sebagai neural voice.
+- `audit/LATEST-AUDIT-REPORT.md` — current findings and repair rationale
+- `audit/LATEST-GATE-MATRIX.md` / `audit/LATEST-GATE-RESULTS.json` — current gates
+- `audit/KOKORO-INFERENCE-EVIDENCE.md` — six-voice runtime inference proof
+- `audit/PUTER-COEP-COMPATIBILITY.md` — Puter integration analysis
+- `audit/NEXT-EXECUTION-DEVICE-GATE.md` — mandatory owner-device gate
+- `audit/LATEST-RELEASE-DECISION.md` — explicit no-release decision
+- `repair/` — patch/manifest repair artifacts
+- `candidate/` — review snapshot of changed source files
 
-## Struktur repository
-
-- `audit/` — laporan, findings, gate matrix, decision, checksums, test logs, dan device retest plan.
-- `repair/` — manifest/hash dan patch perubahan terhadap ZIP input asli.
-- `candidate/` — source files yang berubah/ditambahkan pada audit ini.
-- `artifacts/` — metadata/checksum bundle lokal. Binary kandidat penuh 119 MB tidak dipublish sebagai satu file GitHub biasa; aset vendor besar direferensikan dengan hash/manifest.
-
-## Release rule
-
-Jangan release/merge/deploy berdasarkan repository ini sebelum **semua** gate PASS, terutama real-device gate. Finding `NV-010` tetap release blocker sampai neural audio benar-benar terdengar pada iPhone/PWA standalone dan provider terkonfirmasi neural lokal.
+Do not enable Pages, create a GitHub Release, or tag this candidate as released while any gate is BLOCKED or FAIL.
