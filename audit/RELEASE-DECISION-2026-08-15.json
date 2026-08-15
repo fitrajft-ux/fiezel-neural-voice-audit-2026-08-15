@@ -1,0 +1,19 @@
+{
+  "schema": "fiezel-release-decision-v1",
+  "date": "2026-08-15",
+  "decision": "BLOCKED",
+  "releasePerformed": false,
+  "githubAuditRepositoryCreated": true,
+  "githubAuditRepository": "fitrajft-ux/fiezel-neural-voice-audit-2026-08-15",
+  "reason": "User rule forbids release until every gate passes. Real-device gate is PENDING and aggregate release-audit remains INCOMPLETE.",
+  "qualitySuite": "39/39 PASS",
+  "productionClaim": false,
+  "realDeviceGate": "PENDING",
+  "nextRequiredEvidence": [
+    "Diagnostics export from standalone iPhone/PWA with diagBuild m022-1",
+    "Neural-only preview audibly succeeds on device",
+    "Selected voice persists and each requested local voice can be invoked",
+    "Cache inventory confirms required model/WASM/voice assets",
+    "No release blocker remains in aggregate release audit"
+  ]
+}
