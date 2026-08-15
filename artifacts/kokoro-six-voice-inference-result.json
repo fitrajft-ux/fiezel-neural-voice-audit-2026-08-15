@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "modelLoadMs": 1921,
+  "sampleRate": 24000,
+  "voices": [
+    {"voice":"af_heart","generateMs":4531,"samples":37800,"status":"PASS"},
+    {"voice":"af_bella","generateMs":3497,"samples":39000,"status":"PASS"},
+    {"voice":"af_nicole","generateMs":3927,"samples":45600,"status":"PASS"},
+    {"voice":"am_michael","generateMs":3688,"samples":42600,"status":"PASS"},
+    {"voice":"bf_emma","generateMs":3382,"samples":38400,"status":"PASS"},
+    {"voice":"bm_george","generateMs":3540,"samples":40800,"status":"PASS"}
+  ],
+  "note": "Browser-oriented bundle executed in a Node browser shim with an explicit local HTTP server. CacheStorage was intentionally unavailable; model/WASM/voice inference still produced non-empty waveform for all six voices. This is not physical iPhone audibility evidence."
+}
