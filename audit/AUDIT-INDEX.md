@@ -1,27 +1,36 @@
 # Audit Index
 
-Kandidat ini **bukan release**. Production gate masih tertutup.
+**Status: UNRELEASED / RELEASE BLOCKED.** Repository ini adalah audit/repair candidate, bukan production release.
 
-## Tersimpan langsung di GitHub
+## Current truth
 
-- `NEURAL-VOICE-AUDIT-2026-08-15.md` — ringkasan audit/repair.
-- `FINDINGS-2026-08-15.md` — finding NV-001 sampai NV-010.
-- `GATE-MATRIX-2026-08-15.json` — quality/release gates dan blocker.
-- `RELEASE-DECISION-2026-08-15.json` — keputusan machine-readable: BLOCKED.
-- `GITHUB-PUBLISH-STATUS-2026-08-15.md` — status ekspor audit candidate.
-- `quality-summary-39-of-39.txt` — final constituent quality suite 39/39 PASS.
-- `AUDIT-SHA256SUMS.txt` — SHA-256 seluruh evidence pada bundle lokal asli.
-- `NEXT-EXECUTION-DEVICE-GATE.md` — prosedur membuka real-device gate.
-- `SOURCE-HANDOFF-PROMPT.md` — handoff/constraint yang menjadi basis audit.
-- `../repair/REPAIR-MANIFEST-2026-08-15.json` — daftar file repair beserta size/hash.
-- `../candidate/` — source repair extract untuk inspeksi cepat.
-- `../artifacts/LARGE-ASSET-MANIFEST.md` — hash model, WASM, dan enam voice.
-- `../artifacts/BUNDLE-CHECKSUMS.sha256` — checksum bundle kandidat/report lokal.
+- `LATEST-AUDIT-REPORT.md` — laporan menyeluruh terbaru.
+- `LATEST-FINDINGS.json` — findings NV-001..NV-013, machine-readable.
+- `LATEST-GATE-MATRIX.md` — matriks gate terbaru.
+- `LATEST-GATE-RESULTS.json` — hasil gate machine-readable.
+- `FULL-WORKFLOW-RESULTS.json` — seluruh 39 command Node dari `quality.yml`, **39/39 PASS**.
+- `RELEASE-AUDIT-SUMMARY.json` — aggregate `release-audit.py`, **154/0 PASS**.
+- `KOKORO-INFERENCE-EVIDENCE.md` — inference nyata **6/6 voice** menghasilkan waveform.
+- `PUTER-COEP-COMPATIBILITY.md` — audit Puter/CORP/COEP.
+- `NEXT-EXECUTION-DEVICE-GATE.md` — prosedur mandatory real-device gate.
+- `LATEST-RELEASE-DECISION.md` — keputusan eksplisit **BLOCKED / NO RELEASE**.
+- `GITHUB-PUBLISH-STATUS-2026-08-15.md` — status sinkronisasi audit GitHub.
 
-## Evidence yang tidak diklaim byte-identik di GitHub
+## Source / repair evidence
 
-Bundle laporan lokal asli berukuran **191,224 byte** dan full candidate **124,063,918 byte**. Percobaan transfer ZIP laporan lewat connector menghasilkan blob 7,521 byte, terdeteksi pada consistency pass, dan blob/path tersebut sudah dihapus agar tidak ada artefak korup yang tampak valid.
+- `../candidate/` — snapshot source/test repair untuk review.
+- `../repair/REPAIR-MANIFEST-2026-08-15.json` — manifest file repair.
+- `../repair/REPAIR-PATCH-SHA256.txt` — checksum patch canonical lokal.
+- `../artifacts/kokoro-six-voice-inference.mjs` — reproducible inference harness.
+- `../artifacts/kokoro-six-voice-inference-result.json` — hasil inference 6 voice.
+- `../artifacts/kokoro-six-voice-http-requests.txt` — request evidence model/WASM/voices.
+- `../artifacts/LARGE-ASSET-MANIFEST.md` — hash model, WASM, dan voice binaries.
+- `../artifacts/BUNDLE-CHECKSUMS.sha256` — checksum bundle/evidence yang dipertahankan.
 
-Karena itu `repair-from-upload.patch`, `test-logs/`, dan `release-audit-timeout-*.log` tidak diklaim sebagai file direct GitHub pada index ini. SHA-256 asli semuanya tercatat di `AUDIT-SHA256SUMS.txt`; laporan inti dan hasil quality disimpan native. Lihat `../artifacts/EXPORT-LIMITATIONS.md`.
+## Historical files
 
-Status repository: **NOT RELEASED / DEVICE GATE PENDING**.
+File bernama `*-2026-08-15.*` yang lebih lama dipertahankan sebagai jejak audit. Jika ada perbedaan status, file `LATEST-*` dan dokumen pada bagian **Current truth** di atas adalah checkpoint terbaru.
+
+## Release blockers
+
+Automated gates sudah hijau, tetapi release tetap dilarang sampai real iPhone Home Screen PWA membuktikan audible `kokoro-local` setelah cold relaunch dari aset yang sudah tersimpan, dan Puter tetap berfungsi (`puterLoaded:true`) di exact candidate SW/COEP context.
