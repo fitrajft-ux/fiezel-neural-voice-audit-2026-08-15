@@ -10,8 +10,26 @@
   const absolute=path=>new URL(String(path).replace(/^\.\//,''),rootUrl).href;
   const WASM={path:'vendor/kokoro-js/wasm/ort-wasm-simd-threaded.jsep.wasm',bytes:21596019,mime:'application/wasm'};
   const MODEL={path:'vendor/kokoro-model/onnx/model_quantized.onnx',bytes:92361116};
+  // Regression fix: the original patch had no ceiling on how long priming
+  // could take. On a slow/stalled connection, fetch()/cache.add() for the
+  // 21MB WASM and 92MB model can hang indefinitely with zero feedback --
+  // this was reported as "Siapkan suara offline" getting stuck forever
+  // with the button never re-enabling. PRIME_TIMEOUT_MS caps that: if
+  // priming doesn't finish in time, we give up on the head-start and let
+  // the normal prepare()/warmAssets() flow (which already retries and
+  // surfaces errors to the UI) do the actual work instead.
+  // [DOC-SYNC-M017-20260814] PRIME_TIMEOUT_MS default = 45000 ms = 45 detik.
+  // Dokumentasi di FIEZEL-Orkestrasi-Protokol-Pelengkap.md (fix_applied_this_round)
+  // sudah diselaraskan ke "45 detik (45.000 ms)" pada 2026-08-14 (sebelumnya
+  // tertulis "25 detik"). Nilai runtime TIDAK diubah di sini.
   const PRIME_TIMEOUT_MS=Number(root.FIEZEL_IOS_PRIME_TIMEOUT_MS)||45000;
   const PRIME_ASSET_COUNT=Number(runtime.assetCount)||13;
+  // [DOC-SYNC-M017-20260814] PRIME_TOTAL_BYTES fallback (119.796.601 B) hanya
+  // dipakai saat runtime.totalBytes tidak tersedia. Angka terverifikasi dari
+  // manifest asli (fiezel-neural-voice-bootstrap.js:17-31, 13 aset):
+  // total = 119.274.361 B. Selisih +522.240 B = ukuran satu voice .bin
+  // (af_heart/af_bella/dll, masing-masing 522.240 B). Efeknya kosmetik
+  // (hanya progress bar), bukan logika priming. Sumber: analysis/idb-migration-design.md.
   const PRIME_TOTAL_BYTES=Number(runtime.totalBytes)||119274361;
   let primePromise=null;
 
@@ -44,15 +62,22 @@
     const url=absolute(item.path);
     if(await has(cache,url))return true;
     let response;
-    try{response=await fetch(url,{cache:'reload',credentials:'same-origin'});}catch(error){diag({phase:'buffer_fetch_error',asset:item.path,error:String(error?.message||error)});throw error;}
+    try{
+      response=await fetch(url,{cache:'reload',credentials:'same-origin'});
+    }catch(error){
+      diag({phase:'buffer_fetch_error',asset:item.path,error:String(error?.message||error)});
+      throw error;
+    }
     if(!response.ok)throw new Error(`Voice asset failed: ${item.path} (${response.status})`);
     let buffer;
-    try{buffer=await response.arrayBuffer()}catch(error){diag({phase:'buffer_read_error',asset:item.path,error:String(error?.message||error)});throw error}
+    try{buffer=await response.arrayBuffer()}
+    catch(error){diag({phase:'buffer_read_error',asset:item.path,error:String(error?.message||error)});throw error}
     if(buffer.byteLength!==item.bytes)throw new Error(`Voice asset size mismatch: ${item.path} (${buffer.byteLength}/${item.bytes})`);
     const headers=new Headers();
     headers.set('Content-Type',item.mime||response.headers?.get?.('content-type')||'application/octet-stream');
     headers.set('Content-Length',String(buffer.byteLength));
-    try{await cache.put(url,new Response(buffer,{status:200,headers}))}catch(error){diag({phase:'buffer_cache_put_error',asset:item.path,error:String(error?.message||error)});throw error}
+    try{await cache.put(url,new Response(buffer,{status:200,headers}))}
+    catch(error){diag({phase:'buffer_cache_put_error',asset:item.path,error:String(error?.message||error)});throw error}
     if(!(await has(cache,url)))throw new Error(`Buffered cache verification failed: ${item.path}`);
     diag({phase:'buffer_cached',asset:item.path,bytes:buffer.byteLength});
     return true;
@@ -61,11 +86,18 @@
   async function cacheBrowserManaged(cache,item){
     const url=absolute(item.path);
     if(await has(cache,url))return true;
-    try{const request=new Request(url,{cache:'reload',credentials:'same-origin'});await cache.add(request);}catch(error){diag({phase:'cache_add_error',asset:item.path,error:String(error?.message||error)});throw error;}
+    try{
+      const request=new Request(url,{cache:'reload',credentials:'same-origin'});
+      await cache.add(request);
+    }catch(error){
+      diag({phase:'cache_add_error',asset:item.path,error:String(error?.message||error)});
+      throw error;
+    }
     if(!(await has(cache,url)))throw new Error(`Browser-managed cache verification failed: ${item.path}`);
     diag({phase:'cache_add_ok',asset:item.path,bytes:item.bytes});
     return true;
   }
+
 
   async function preflightLargeAssets(cache){
     let missingBytes=0;
@@ -92,12 +124,21 @@
     const cache=await root.caches.open(cacheName);
     await preflightLargeAssets(cache);
     let completed=0,completedBytes=0;
-    const done=(item)=>{completed++;completedBytes+=item.bytes;reportProgress({phase:'downloading',completed,completedBytes,current:item.path},onProgress);};
+    const done=(item)=>{
+      completed++;completedBytes+=item.bytes;
+      reportProgress({phase:'downloading',completed,completedBytes,current:item.path},onProgress);
+    };
+    // WebKit is more reliable when the 21 MB WASM is fully materialized before cache.put.
     let wasmReady=await has(cache,absolute(WASM.path));
-    if(!wasmReady){try{wasmReady=await cacheBuffered(cache,WASM)}catch(error){diag({phase:'wasm_prime_failed',error:String(error?.message||error)});wasmReady=false}}
+    if(!wasmReady){
+      try{wasmReady=await cacheBuffered(cache,WASM)}catch(error){diag({phase:'wasm_prime_failed',error:String(error?.message||error)});wasmReady=false}
+    }
     if(wasmReady)done(WASM);
+    // Let CacheStorage own the 92 MB model transfer instead of wrapping a live JS ReadableStream.
     let modelReady=await has(cache,absolute(MODEL.path));
-    if(!modelReady){try{modelReady=await cacheBrowserManaged(cache,MODEL)}catch(error){diag({phase:'model_prime_failed',error:String(error?.message||error)});modelReady=false}}
+    if(!modelReady){
+      try{modelReady=await cacheBrowserManaged(cache,MODEL)}catch(error){diag({phase:'model_prime_failed',error:String(error?.message||error)});modelReady=false}
+    }
     if(modelReady)done(MODEL);
     return wasmReady&&modelReady;
   }
@@ -105,8 +146,16 @@
   function prepare(options={}){
     if(primePromise)return primePromise;
     primePromise=(async()=>{
-      try{await withTimeout(primeLargeAssets(options.onProgress),PRIME_TIMEOUT_MS,'ios_prime');}
-      catch(error){diag({phase:'prime_timeout_or_error',error:String(error?.message||error)});if(error?.code==='storage_insufficient')throw error;}
+      try{
+        await withTimeout(primeLargeAssets(options.onProgress),PRIME_TIMEOUT_MS,'ios_prime');
+      }catch(error){
+        // A storage preflight failure is authoritative: do not start a large
+        // transfer only to rediscover the same quota failure in the base runtime.
+        diag({phase:'prime_timeout_or_error',error:String(error?.message||error)});
+        if(error?.code==='storage_insufficient')throw error;
+        // Other priming failures are best-effort only; the base runtime owns
+        // retries and full manifest verification.
+      }
       return runtime.prepare(options);
     })().finally(()=>{primePromise=null});
     return primePromise;
