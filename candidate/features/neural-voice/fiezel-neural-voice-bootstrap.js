@@ -71,6 +71,9 @@
   }
   function status(){
     const stored=readStatus();
+    // timeoutMs = ambang efektif terlama sebelum jatuh ke suara browser.
+    // lastFallbackReason = kenapa fallback terakhir terjadi; sebelumnya alasannya
+    // hanya masuk localStorage lewat diag() dan tak pernah terlihat dari status().
     const timeoutMs=Math.max(NEURAL_TTS_TIMEOUT_MS,INITIALIZE_TIMEOUT_MS);
     return Object.freeze({schema:STATUS_SCHEMA,version,phase,prepared:stored.prepared||preparedFlag,assetsCached:stored.prepared||preparedFlag,ready:!!service,error:lastError,storage:preparedStorage(),totalBytes,assetCount:assets.length,zeroPaidRuntime:true,crossOriginInference:false,crossOriginIsolated:!!root.crossOriginIsolated,speechSynthesis:!!(root.speechSynthesis&&root.SpeechSynthesisUtterance),storageEstimate:lastStorageEstimate,timeoutMs,lastFallbackReason});
   }
@@ -125,6 +128,8 @@
       const contentType=String(response.headers?.get?.('content-type')||'');
       const isLarge=item.bytes>=LARGE_ASSET_STREAM_THRESHOLD;
       if(!cachedContentTypeIsValid(item,contentType))return{url,valid:false,length,contentType,reason:'mime'};
+      // For streamed large assets, a CDN may preserve encoded transfer Content-Length.
+      // Cache presence is the reliable low-memory signal; cache.put rejects an incomplete body stream.
       if(!isLarge&&length&&length!==item.bytes)return{url,valid:false,length,contentType,reason:'size'};
       return{url,valid:true,length,contentType};
     }catch{return{url,valid:false,length:0,contentType:''}}
@@ -153,6 +158,8 @@
     return true;
   }
   async function putFetchedAsset(cache,item,url,fetched){
+    // Module scripts and streaming WebAssembly need deterministic MIME types in Cache Storage.
+    // Safari rejects an ESM import when a cached .mjs response is application/octet-stream.
     const contentType=requiredContentType(item)||fetched.headers?.get?.('content-type')||'application/octet-stream';
     if(item.bytes>=LARGE_ASSET_STREAM_THRESHOLD){
       await cache.put(url,new Response(fetched.body,{status:fetched.status||200,statusText:fetched.statusText||'',headers:{'Content-Type':contentType}}));
