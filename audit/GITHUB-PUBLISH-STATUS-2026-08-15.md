@@ -1,16 +1,26 @@
 # GitHub Publish Status — 2026-08-15
 
-Status: **AUDIT REPOSITORY CREATED / NOT RELEASED**.
+Status: **AUDIT REPOSITORY POPULATED / NOT RELEASED**.
 
-Repository audit tersedia di `fitrajft-ux/fiezel-neural-voice-audit-2026-08-15`. Repository ini menyimpan laporan inti, findings, gate matrix, decision, handoff, repair manifest, checksum evidence, selected repair source, regression gate, dan large-asset manifest.
+Repository audit: `fitrajft-ux/fiezel-neural-voice-audit-2026-08-15`.
 
-Consistency pass menemukan percobaan upload archive laporan melalui binary connector terpotong menjadi 7,521 byte dari sumber asli 191,224 byte. Artefak korup tersebut telah dihapus. Full candidate 124,063,918 byte juga tidak diklaim berada di GitHub. Detail dan SHA-256 ada di `artifacts/EXPORT-LIMITATIONS.md`, `artifacts/BUNDLE-CHECKSUMS.sha256`, dan `audit/AUDIT-SHA256SUMS.txt`.
+Repository ini adalah wadah audit/repair terisolasi. Ini **bukan deploy**, tidak mengaktifkan Pages, tidak membuat GitHub Release/tag, dan tidak mengubah repository aplikasi asli.
 
-Pembuatan repository **tidak** membuka production gate dan bukan deploy.
+## Bukti terbaru yang sudah disinkronkan
 
-Release masih dilarang karena:
+- seluruh 39 command Node pada `quality.yml`: **39/39 PASS**;
+- consolidated static/source + workflow gates: **46/46 PASS**;
+- aggregate `release-audit.py`: **154/0 PASS**, exit code 0;
+- direct Kokoro ONNX/WASM inference: **6/6 bundled voices PASS** dengan waveform non-empty 24 kHz;
+- Puter upstream source saat ini memasang `Cross-Origin-Resource-Policy: cross-origin`, sehingga structurally compatible dengan `COEP: require-corp`;
+- candidate source, repair manifest/checksum, findings, gate matrix, inference evidence, dan mandatory device-gate plan tersimpan di repository ini.
 
-1. `realDeviceGate=PENDING`: belum ada bukti audio neural dari iPhone/PWA standalone.
-2. Aggregate `release-audit.py` masih `INCOMPLETE/TIMEOUT`; constituent quality suite adalah **39/39 PASS**, tetapi aggregate gate tidak dipalsukan menjadi PASS.
+## Yang tetap BLOCKED
 
-Aturan tetap: jangan release jika satu pun mandatory gate belum PASS.
+1. Real iPhone / Home Screen PWA belum membuktikan output neural yang benar-benar terdengar dan provider `kokoro-local`.
+2. Cold relaunch dari aset yang sudah tersimpan belum dibuktikan di device tanpa download ulang ~113 MB.
+3. `puterLoaded:true` dan fungsi Puter pada exact owner PWA + candidate service worker/COEP belum dibuktikan.
+4. Headless Chromium/service-worker E2E tidak dapat dijalankan secara valid di sandbox ini karena browser tidak dapat mencapai loopback server.
+5. `npm install` tidak dapat diulang di sandbox karena outbound DNS/network tidak tersedia.
+
+Aturan tetap: **jangan release jika satu mandatory gate pun belum PASS**.
