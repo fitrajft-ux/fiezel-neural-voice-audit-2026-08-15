@@ -33,7 +33,9 @@
       const words = sentence.split(/\s+/);
       if (words.length > hardWords) {
         flush();
-        for (let i = 0; i < words.length; i += hardWords) chunks.push(words.slice(i, i + hardWords).join(' '));
+        for (let i = 0; i < words.length; i += hardWords) {
+          chunks.push(words.slice(i, i + hardWords).join(' '));
+        }
         continue;
       }
       if (count > 0 && count + words.length > targetWords) flush();
@@ -55,6 +57,10 @@
       async speak(text, options) {
         if (!canUseSpeechSynthesis(env)) throw new Error('Browser TTS unavailable');
         return new Promise((resolve, reject) => {
+          // Sebelumnya onerror dan timeout memanggil resolve, jadi ucapan yang tidak
+          // pernah berbunyi tetap dilaporkan sukses dan tidak masuk diagnostics.
+          // Sekarang setiap jalur terminal lewat settle() bersama, dan kegagalan
+          // ditolak dengan alasan yang bisa dibaca.
           let done = false;
           let started = false;
           const settle = (fn, value) => { if (done) return; done = true; fn(value); };
@@ -68,7 +74,9 @@
           setTimeout(() => { if (done) return; try { env.speechSynthesis.speak(u); } catch (error) { settle(reject, error); } }, 60);
         });
       },
-      stop() { if (canUseSpeechSynthesis(env)) env.speechSynthesis.cancel(); }
+      stop() {
+        if (canUseSpeechSynthesis(env)) env.speechSynthesis.cancel();
+      }
     };
   }
 
@@ -87,7 +95,9 @@
 
     function stop() {
       generation += 1;
-      if (typeof activeStop === 'function') { try { activeStop(); } catch (_) {} }
+      if (typeof activeStop === 'function') {
+        try { activeStop(); } catch (_) {}
+      }
       activeStop = null;
       fallback.stop();
     }
