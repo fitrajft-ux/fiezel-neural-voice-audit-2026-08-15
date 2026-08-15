@@ -4,14 +4,16 @@
 
 ## Current truth
 
+- `FINAL-CHECKPOINT-2026-08-15.md` — checkpoint akhir audit lokal dan release boundary.
 - `LATEST-AUDIT-REPORT.md` — laporan menyeluruh terbaru.
-- `LATEST-FINDINGS.json` — findings NV-001..NV-013, machine-readable.
+- `LATEST-FINDINGS.json` — findings NV-001..NV-015, machine-readable.
 - `LATEST-GATE-MATRIX.md` — matriks gate terbaru.
 - `LATEST-GATE-RESULTS.json` — hasil gate machine-readable.
 - `FULL-WORKFLOW-RESULTS.json` — seluruh 39 command Node dari `quality.yml`, **39/39 PASS**.
 - `RELEASE-AUDIT-SUMMARY.json` — aggregate `release-audit.py`, **154/0 PASS**.
 - `KOKORO-INFERENCE-EVIDENCE.md` — inference nyata **6/6 voice** menghasilkan waveform.
 - `PUTER-COEP-COMPATIBILITY.md` — audit Puter/CORP/COEP.
+- `BROWSER-E2E-BLOCKER.md` — alasan Chromium sandbox tidak dapat dipakai sebagai E2E proof.
 - `NEXT-EXECUTION-DEVICE-GATE.md` — prosedur mandatory real-device gate.
 - `LATEST-RELEASE-DECISION.md` — keputusan eksplisit **BLOCKED / NO RELEASE**.
 - `GITHUB-PUBLISH-STATUS-2026-08-15.md` — status sinkronisasi audit GitHub.
@@ -29,7 +31,7 @@
 
 ## Historical files
 
-File bernama `*-2026-08-15.*` yang lebih lama dipertahankan sebagai jejak audit. Jika ada perbedaan status, file `LATEST-*` dan dokumen pada bagian **Current truth** di atas adalah checkpoint terbaru.
+File bernama `*-2026-08-15.*` yang lebih lama dipertahankan sebagai jejak audit. Jika ada perbedaan status, file `FINAL-CHECKPOINT-2026-08-15.md`, `LATEST-*`, dan dokumen pada bagian **Current truth** di atas adalah checkpoint terbaru.
 
 ## Release blockers
 
