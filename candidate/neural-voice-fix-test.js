@@ -33,6 +33,7 @@ function loadModule(rel, extraGlobals) {
   return { sandbox, api: sandbox.module.exports };
 }
 
+// --- AudioContext tiruan yang menghitung instansiasi -------------------------
 function makeAudioEnv() {
   const env = { created: 0 };
   env.AudioContext = function () {
@@ -61,6 +62,8 @@ function makeSpeechEnv(behaviour) {
   return env;
 }
 
+const tick = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function main() {
   console.log('neural-voice-fix-test');
 
@@ -72,14 +75,19 @@ async function main() {
     const b = api.createPlayer(env);
     const c = api.createPlayer(env);
     a.warm(); b.warm(); c.warm();
-    check('tiga createPlayer + tiga warm hanya membuat 1 AudioContext', env.created === 1, 'created=' + env.created);
+    check('tiga createPlayer + tiga warm hanya membuat 1 AudioContext',
+      env.created === 1, 'created=' + env.created);
     check('konteks tersimpan di env untuk dibagi', !!env.__fiezelWebAudioContext);
+
     await a.play({ audio: Float32Array.from([0, 0.1, 0]), sampling_rate: 24000 });
     await b.play({ audio: Float32Array.from([0, 0.1, 0]), sampling_rate: 24000 });
-    check('play() dari dua player tetap 1 AudioContext', env.created === 1, 'created=' + env.created);
+    check('play() dari dua player tetap 1 AudioContext',
+      env.created === 1, 'created=' + env.created);
+
     const env2 = makeAudioEnv();
     api.createPlayer(env2).warm();
     check('env berbeda tetap dapat konteksnya sendiri', env2.created === 1);
+
     const bare = api.createPlayer({});
     check('env tanpa AudioContext tidak meledak saat warm', bare.warm() === false);
   }
@@ -87,13 +95,23 @@ async function main() {
   console.log('\n2 — lastFallbackReason terdeklarasi (regresi patch asli)');
   {
     const src = read(BOOTSTRAP);
-    check('ada deklarasi let/var/const untuk lastFallbackReason', /(?:let|var|const)[^;\n]*\blastFallbackReason\b/.test(src));
-    check('lastFallbackReason dipakai di status()', /storageEstimate:lastStorageEstimate,timeoutMs,lastFallbackReason/.test(src));
-    check('lastFallbackReason ditulis di jalur catch neural()', /lastError=errorText\(error\);lastFallbackReason=lastError/.test(src));
-    check('lastFallbackReason ditulis di jalur timeout', /lastFallbackReason=lastError;\s*\n\s*diag\(\{phase:'speak_fallback'/.test(src));
+    check('ada deklarasi let/var/const untuk lastFallbackReason',
+      /(?:let|var|const)[^;\n]*\blastFallbackReason\b/.test(src));
+    check('lastFallbackReason dipakai di status()',
+      /storageEstimate:lastStorageEstimate,timeoutMs,lastFallbackReason/.test(src));
+    check('lastFallbackReason ditulis di jalur catch neural()',
+      /lastError=errorText\(error\);lastFallbackReason=lastError/.test(src));
+    check('lastFallbackReason ditulis di jalur timeout',
+      /lastFallbackReason=lastError;\s*\n\s*diag\(\{phase:'speak_fallback'/.test(src));
+
+    // Simulasi semantik strict-mode: variabel yang dipakai tapi tak dideklarasikan
+    // melempar ReferenceError. Ini yang membuat patch asli mematikan suara.
+    // Dijalankan di realm ini, bukan lewat vm — global proxy vm menelan
+    // pembacaan properti yang tidak ada, jadi tidak merepresentasikan browser.
     let threw = false;
-    try { (function () { 'use strict'; return { a: 1, b: undeclaredOnPurposeXYZ }; })(); }
-    catch (error) { threw = error instanceof ReferenceError; }
+    try {
+      (function () { 'use strict'; return { a: 1, b: undeclaredOnPurposeXYZ }; })();
+    } catch (error) { threw = error instanceof ReferenceError; }
     check('kontrol: variabel tak dideklarasikan memang ReferenceError di strict mode', threw);
   }
 
@@ -102,17 +120,21 @@ async function main() {
     const { api } = loadModule(VOICE);
     const env = makeSpeechEnv(u => setTimeout(() => u.onend && u.onend(), 5));
     const config = { fallback: { browserSpeechSynthesis: true }, voices: { fiezelPrimary: 'af_heart' } };
+
     const noAdapter = api.createVoiceService({ config, adapter: null, env });
     const r1 = await noAdapter.speak('halo');
     check('tanpa adapter → provider browser-speech-synthesis', r1.provider === 'browser-speech-synthesis', JSON.stringify(r1));
     check('tanpa adapter → chunks & outputs terisi', r1.chunks === 1 && Array.isArray(r1.outputs));
     check('tanpa adapter → voice ikut dilaporkan', r1.voice === 'af_heart', String(r1.voice));
     check('tanpa adapter → started ikut terbawa', r1.started === true);
+
     const badAdapter = { kind: 'neural-local', generate: () => Promise.reject(new Error('adapter meledak')) };
     const withAdapter = api.createVoiceService({ config, adapter: badAdapter, env });
     const r2 = await withAdapter.speak('halo lagi', { allowFallback: true });
-    check('adapter gagal → jatuh ke browser dengan provider eksplisit', r2.provider === 'browser-speech-synthesis', JSON.stringify(r2));
+    check('adapter gagal → jatuh ke browser dengan provider eksplisit',
+      r2.provider === 'browser-speech-synthesis', JSON.stringify(r2));
     check('adapter gagal → chunks dilaporkan dari pemecahan asli', typeof r2.chunks === 'number');
+
     const okAdapter = { kind: 'neural-local', generate: () => Promise.resolve({ audio: Float32Array.from([0]), sampling_rate: 24000 }) };
     const good = api.createVoiceService({ config, adapter: okAdapter, env, playAudio: () => ({ done: Promise.resolve(), stop() {} }) });
     const r3 = await good.speak('sukses');
@@ -123,15 +145,22 @@ async function main() {
   {
     const { api } = loadModule(VOICE);
     const config = { fallback: { browserSpeechSynthesis: true }, voices: { fiezelPrimary: 'af_heart' } };
+
     const errEnv = makeSpeechEnv(u => setTimeout(() => u.onerror && u.onerror({ error: 'not-allowed' }), 5));
     const svc = api.createVoiceService({ config, adapter: null, env: errEnv });
     let rejected = null;
     await svc.speak('gagal').then(() => {}, e => { rejected = e; });
+    // Error dibuat di dalam sandbox vm, jadi realm-nya berbeda dan `instanceof
+    // Error` di realm ini selalu false. Pakai tag objek.
     const isError = (v) => Object.prototype.toString.call(v) === '[object Error]';
     check('onerror → promise ditolak, bukan resolve', isError(rejected), String(rejected));
     check('alasan penolakan bisa dibaca', rejected && /browser_tts_not-allowed/.test(rejected.message), rejected && rejected.message);
+
+    // Kontrol perilaku lama: dulu onerror memanggil resolve, jadi ucapan yang
+    // tidak pernah berbunyi tetap dianggap sukses.
     const src = read(VOICE);
-    check('tidak ada lagi onerror yang resolve diam-diam', !/u\.onerror\s*=\s*\(\)\s*=>\s*finish\(\)/.test(src));
+    check('tidak ada lagi onerror yang resolve diam-diam',
+      !/u\.onerror\s*=\s*\(\)\s*=>\s*finish\(\)/.test(src));
     check('semua jalur terminal lewat settle() bersama', /const settle\s*=/.test(src));
   }
 
@@ -142,6 +171,7 @@ async function main() {
     let suspendedError='';
     await api.createPlayer({AudioContext:SuspendedAudioContext}).play({data:Float32Array.from([0.1,0.2]),sampling_rate:24000}).catch(e=>{suspendedError=String(e&&e.message||e)});
     check('context tetap suspended → play menolak',/not running/.test(suspendedError),suspendedError);
+
     function ThrowingAudioContext(){this.state='running';this.createBuffer=()=>({copyToChannel(){}});this.createBufferSource=()=>({connect(){},start(){throw new Error('start_blocked')},stop(){}});this.destination={}}
     let startError='';
     await api.createPlayer({AudioContext:ThrowingAudioContext}).play({data:Float32Array.from([0.1,0.2]),sampling_rate:24000}).catch(e=>{startError=String(e&&e.message||e)});
@@ -155,10 +185,15 @@ async function main() {
       check('tidak ada blok rusak "}){" di ' + path.basename(rel), !/^\s*\}\)\{/m.test(src));
     }
     const audibility = read(AUDIBILITY);
-    check('browserSpeakImmediate hanya didefinisikan sekali', (audibility.match(/function browserSpeakImmediate/g) || []).length === 1);
-    check('speak di audibility-fix hanya didefinisikan sekali', (audibility.match(/async function speak\(/g) || []).length === 1);
+    check('browserSpeakImmediate hanya didefinisikan sekali',
+      (audibility.match(/function browserSpeakImmediate/g) || []).length === 1);
+    check('speak di audibility-fix hanya didefinisikan sekali',
+      (audibility.match(/async function speak\(/g) || []).length === 1);
     const bootstrap = read(BOOTSTRAP);
-    check('speak di bootstrap hanya didefinisikan sekali', (bootstrap.match(/async function speak\(/g) || []).length === 1);
+    check('speak di bootstrap hanya didefinisikan sekali',
+      (bootstrap.match(/async function speak\(/g) || []).length === 1);
+    check('version.js tidak ikut diubah oleh perbaikan ini',
+      read('version.js').indexOf("'5.19.0'") !== -1);
   }
 
   console.log('');
