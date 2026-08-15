@@ -1,0 +1,46 @@
+{
+  "schema": "fiezel-neural-voice-latest-gates-v1",
+  "date": "2026-08-15",
+  "releaseEligible": false,
+  "automated": {
+    "status": "PASS",
+    "staticAndWorkflow": {"pass": 46, "fail": 0, "total": 46},
+    "qualityWorkflowNodeCommands": {"pass": 39, "fail": 0, "total": 39},
+    "releaseAudit": {"pass": 154, "fail": 0},
+    "neuralRuntime": {"pass": 39, "fail": 0},
+    "speakingListening": {"pass": 25, "fail": 0},
+    "productAudit": {"pass": 49, "fail": 0},
+    "kokoroSixVoiceInference": {"pass": 6, "fail": 0, "sampleRate": 24000}
+  },
+  "invariants": {
+    "versionFilesUnchanged": true,
+    "vendorNeuralAssetsUnchanged": true,
+    "brokenBlockRegressionAbsent": true
+  },
+  "integrationEvidence": {
+    "puterUpstreamCorpSource": {
+      "status": "PASS_SOURCE_ONLY",
+      "commit": "f15d835eeb6e57455a394ad81b2b21d4c0706824",
+      "header": "Cross-Origin-Resource-Policy: cross-origin"
+    }
+  },
+  "blocked": [
+    {
+      "gate": "npm-install-local",
+      "reason": "Outbound DNS/network unavailable in audit sandbox"
+    },
+    {
+      "gate": "headless-browser-service-worker-e2e",
+      "reason": "Chromium cannot navigate to sandbox loopback although curl can"
+    },
+    {
+      "gate": "owner-iphone-pwa-audibility",
+      "reason": "Physical owner device required"
+    },
+    {
+      "gate": "owner-live-puter-under-coep",
+      "reason": "Exact production CDN + service-worker behavior must be observed on owner PWA"
+    }
+  ],
+  "releaseDecision": "BLOCKED_NO_RELEASE"
+}
