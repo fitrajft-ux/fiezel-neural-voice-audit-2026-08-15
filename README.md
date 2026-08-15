@@ -14,10 +14,13 @@ Current verified results:
 
 Start with:
 
+- `audit/FINAL-CHECKPOINT-2026-08-15.md` — final local checkpoint and release boundary
 - `audit/LATEST-AUDIT-REPORT.md` — current findings and repair rationale
+- `audit/LATEST-FINDINGS.json` — current NV-001..NV-015 findings
 - `audit/LATEST-GATE-MATRIX.md` / `audit/LATEST-GATE-RESULTS.json` — current gates
 - `audit/KOKORO-INFERENCE-EVIDENCE.md` — six-voice runtime inference proof
 - `audit/PUTER-COEP-COMPATIBILITY.md` — Puter integration analysis
+- `audit/BROWSER-E2E-BLOCKER.md` — sandbox Chromium blocker classification
 - `audit/NEXT-EXECUTION-DEVICE-GATE.md` — mandatory owner-device gate
 - `audit/LATEST-RELEASE-DECISION.md` — explicit no-release decision
 - `repair/` — patch/manifest repair artifacts
