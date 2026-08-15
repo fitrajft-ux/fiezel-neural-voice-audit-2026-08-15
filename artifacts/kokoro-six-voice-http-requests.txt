@@ -1,0 +1,11 @@
+127.0.0.1 - - [15/Aug/2026 02:32:24] "GET /vendor/kokoro-model/tokenizer_config.json HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:24] "GET /vendor/kokoro-model/tokenizer.json HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:24] "GET /vendor/kokoro-model/config.json HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:24] "GET /vendor/kokoro-model/onnx/model_quantized.onnx HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:24] "GET /vendor/kokoro-js/wasm/ort-wasm-simd-threaded.jsep.wasm HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:26] "GET /vendor/kokoro-model/voices/af_heart.bin HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:30] "GET /vendor/kokoro-model/voices/af_bella.bin HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:34] "GET /vendor/kokoro-model/voices/af_nicole.bin HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:38] "GET /vendor/kokoro-model/voices/am_michael.bin HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:41] "GET /vendor/kokoro-model/voices/bf_emma.bin HTTP/1.1" 200 -
+127.0.0.1 - - [15/Aug/2026 02:32:45] "GET /vendor/kokoro-model/voices/bm_george.bin HTTP/1.1" 200 -
