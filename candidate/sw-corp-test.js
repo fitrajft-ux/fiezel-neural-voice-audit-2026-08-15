@@ -23,6 +23,7 @@ function check(label, condition, detail) {
 const SW_SRC = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
 const PUTER = 'https://js.puter.com/v2/';
 
+// --- Headers / Response minimal ---------------------------------------------
 class FakeHeaders {
   constructor(init) {
     this.map = new Map();
@@ -45,6 +46,7 @@ class FakeResponse {
   }
 }
 const opaque = () => {
+  // Sesuai spesifikasi: status 0, header kosong, body null.
   const r = new FakeResponse(null, { status: 0, type: 'opaque' });
   r.ok = false;
   return r;
@@ -72,6 +74,7 @@ function runSw(fetchImpl) {
   return { sandbox, listeners };
 }
 
+// Panggil handler fetch dengan request cross-origin no-cors, tangkap responsnya.
 function callFetchHandler(listeners, request) {
   let captured = null;
   const event = { request, respondWith: (p) => { captured = p; } };
@@ -120,7 +123,9 @@ async function main() {
     const response = await callFetchHandler(listeners, { url: PUTER, method: 'GET', mode: 'no-cors' });
     check('tetap merespons, tidak melempar', !!response);
     check('diteruskan sebagai opaque apa adanya', response.type === 'opaque', String(response.type));
-    check('REGRESI UTAMA: bukan 200 dengan body kosong', !(response.status === 200 && (response.body === null || response.body === '')), 'status=' + response.status + ' body=' + String(response.body));
+    check('REGRESI UTAMA: bukan 200 dengan body kosong',
+      !(response.status === 200 && (response.body === null || response.body === '')),
+      'status=' + response.status + ' body=' + String(response.body));
     check('mundur ke no-cors sekali', noCorsCalls >= 1);
   }
 
@@ -147,10 +152,14 @@ async function main() {
 
   console.log('\n5 — gate sumber');
   {
-    check('tidak ada lagi new Response(response.body, {status:200}) dari opaque', !/const response=await fetch\(request,\{mode:'no-cors'[\s\S]{0,400}new Response\(response\.body,\{status:200/.test(SW_SRC));
+    check('tidak ada lagi new Response(response.body, {status:200}) dari opaque',
+      !/const response=await fetch\(request,\{mode:'no-cors'[\s\S]{0,400}new Response\(response\.body,\{status:200/.test(SW_SRC));
     check('mode cors dicoba di dalam wrapper', /mode:'cors'/.test(SW_SRC));
-    check('install/activate tetap satu listener masing-masing', (SW_SRC.match(/addEventListener\('install'/g) || []).length === 1 && (SW_SRC.match(/addEventListener\('activate'/g) || []).length === 1);
-    check('version.js tidak ikut diubah', fs.readFileSync(path.join(__dirname, 'version.js'), 'utf8').indexOf("'5.19.0'") !== -1);
+    check('install/activate tetap satu listener masing-masing',
+      (SW_SRC.match(/addEventListener\('install'/g) || []).length === 1 &&
+      (SW_SRC.match(/addEventListener\('activate'/g) || []).length === 1);
+    check('version.js tidak ikut diubah',
+      fs.readFileSync(path.join(__dirname, 'version.js'), 'utf8').indexOf("'5.19.0'") !== -1);
   }
 
   console.log('');
