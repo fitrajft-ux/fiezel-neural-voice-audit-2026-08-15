@@ -2,18 +2,188 @@
   "schema": "fiezel-neural-voice-findings-v1",
   "generated": "2026-08-15",
   "findings": [
-    {"id":"NV-001","severity":"BLOCKER","status":"BLOCKED","title":"Belum ada bukti neural voice terdengar di iPhone/PWA standalone","impact":"Release/promotion tidak boleh dilakukan; gejala owner belum dapat dinyatakan selesai.","action":"Jalankan device gate dari ikon Home Screen dan kirim Diagnostics + hasil Uji neural."},
-    {"id":"NV-002","severity":"HIGH","status":"FIXED","title":"Tidak ada pilihan model/voice untuk user","repair":"Tambahkan Auto + enam voice, preference persisten, selector Skills Lab, dan Uji neural."},
-    {"id":"NV-003","severity":"HIGH","status":"FIXED","title":"Cold launch prepared tetap browser-first","repair":"Prepared-but-not-ready mencoba neural initialization dulu tanpa download ulang; fallback hanya setelah neural gagal."},
-    {"id":"NV-004","severity":"HIGH","status":"FIXED","title":"AudioContext dibuat berulang dan dapat habis di WebKit","repair":"Satu AudioContext singleton per page/environment."},
-    {"id":"NV-005","severity":"HIGH","status":"FIXED","title":"Browser fallback melaporkan sukses walau tidak berbunyi","repair":"onerror/not-started/timeout reject dan alasan fallback diekspos."},
-    {"id":"NV-006","severity":"HIGH","status":"FIXED","title":"Web Audio source.start() error ditelan","repair":"Propagasi error start() ke neural/fallback/diagnostics."},
-    {"id":"NV-007","severity":"HIGH","status":"FIXED","title":"Priming iOS melewati preflight storage dan progress dapat false-positive","repair":"Preflight quota sebelum aset besar; progress selesai hanya sesudah cache verification."},
-    {"id":"NV-008","severity":"HIGH","status":"FIXED","title":"Timeout priming dapat memulai transfer model kedua","repair":"Pertahankan satu primeTask; timeout tidak menjalankan downloader kedua."},
-    {"id":"NV-009","severity":"HIGH","status":"FIXED","title":"Timeout init ONNX dapat membuat session kedua","repair":"Pertahankan satu backend init task; hasil terlambat dapat diadopsi tanpa duplikasi session."},
-    {"id":"NV-010","severity":"CRITICAL","status":"FIXED","title":"Service worker merekonstruksi opaque no-cors menjadi 200 body kosong","repair":"CORS-first bila readable; bila tidak, pass-through opaque; jangan synthesize empty 200."},
-    {"id":"NV-011","severity":"HIGH","status":"OPEN","title":"Aset neural masih satu cache dengan app shell dan terikat FIEZEL_VERSION","impact":"Bump version dapat menghapus cache ~113 MB.","action":"Pisahkan cache voice/migrasi IndexedDB setelah device gate; kandidat sengaja tidak bump version."},
-    {"id":"NV-012","severity":"BLOCKER","status":"BLOCKED","title":"Puter live di bawah COEP belum diverifikasi pada konteks owner","impact":"Source Puter kompatibel secara CORP, tetapi exact CDN + owner SW context belum terbukti.","action":"Verifikasi puterLoaded:true dan fungsi Puter pada PWA owner."},
-    {"id":"NV-013","severity":"INFO","status":"BLOCKED_ENVIRONMENT","title":"Browser headless audit tidak dapat mengakses localhost","impact":"Tidak ada browser/service-worker/audio E2E proof dari sandbox.","action":"Gunakan real-device PWA gate; jangan mengubah BLOCKED menjadi PASS."}
+    {
+      "id": "NV-001",
+      "severity": "BLOCKER",
+      "status": "BLOCKED",
+      "title": "Belum ada bukti neural voice terdengar di iPhone/PWA standalone",
+      "evidence": [
+        "handoff/HANDOFF-PROMPT.md §0, §4-5",
+        "audit/logs/chromium-local-browser.log"
+      ],
+      "impact": "Release/promotion tidak boleh dilakukan; gejala owner belum dapat dinyatakan selesai.",
+      "action": "Jalankan device gate dari ikon Home Screen dan kirim Diagnostics + hasil tombol Tes suara."
+    },
+    {
+      "id": "NV-002",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Tidak ada pilihan model/voice untuk user",
+      "evidence": [
+        "features/neural-voice/fiezel-neural-voice-config.js",
+        "app.js:583-591",
+        "neural-voice-product-repair-test.js"
+      ],
+      "impact": "User tidak dapat melihat atau memilih 6 voice yang sebenarnya sudah dibundel.",
+      "repair": "Tambahkan catalog 6 voice, preference persisten auto/fixed, selector di Skills Lab, dan tombol Tes suara."
+    },
+    {
+      "id": "NV-003",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Cold launch prepared tetap browser-first",
+      "evidence": [
+        "features/neural-voice/fiezel-neural-voice-audibility-fix.js",
+        "neural-voice-audibility-test.js"
+      ],
+      "impact": "Aset bisa sudah lengkap tetapi klik suara pertama tidak pernah mencoba neural sehingga user mengira neural tidak bekerja.",
+      "repair": "Jika prepared tetapi belum ready, jalankan ensureReady tanpa download ulang lalu neural speak; fallback hanya jika resume/inference gagal."
+    },
+    {
+      "id": "NV-004",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "AudioContext dibuat berulang dan dapat habis di WebKit",
+      "evidence": [
+        "features/neural-voice/fiezel-web-audio-player.js",
+        "neural-voice-fix-test.js"
+      ],
+      "impact": "Beberapa jalur warm/speak dapat membuat banyak AudioContext; setelah limit WebKit, seluruh output audio termasuk fallback dapat mati.",
+      "repair": "Satu AudioContext singleton per environment/page."
+    },
+    {
+      "id": "NV-005",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Browser fallback melaporkan sukses walau tidak berbunyi",
+      "evidence": [
+        "features/neural-voice/fiezel-neural-voice.js",
+        "features/neural-voice/fiezel-neural-voice-bootstrap.js",
+        "neural-voice-fix-test.js"
+      ],
+      "impact": "UI/test dapat menganggap TTS berhasil saat onerror atau utterance tidak pernah start.",
+      "repair": "onerror/not-started/timeout sekarang reject dan alasan fallback diekspos."
+    },
+    {
+      "id": "NV-006",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Web Audio source.start() error ditelan",
+      "evidence": [
+        "features/neural-voice/fiezel-web-audio-player.js",
+        "neural-voice-product-repair-test.js"
+      ],
+      "impact": "Neural generation bisa berhasil tetapi audio tidak dimulai sementara promise tetap tampak sukses.",
+      "repair": "Propagasi error start() sehingga jalur neural/fallback/diagnostics dapat bereaksi benar."
+    },
+    {
+      "id": "NV-007",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Priming iOS melewati preflight storage dan progress dapat false-positive",
+      "evidence": [
+        "features/neural-voice/fiezel-neural-voice-ios-cache-fix.js",
+        "neural-voice-product-repair-test.js"
+      ],
+      "impact": "Progress dapat mencapai sukses walau cache gagal/kuota kurang, cocok dengan gejala file/progress tampak selesai tetapi runtime tidak siap.",
+      "repair": "Preflight quota sebelum aset besar; done(WASM/MODEL) hanya setelah cache verification."
+    },
+    {
+      "id": "NV-008",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Timeout priming dapat memulai transfer model kedua",
+      "evidence": [
+        "features/neural-voice/fiezel-neural-voice-ios-cache-fix.js",
+        "ios-cache-compat-test.js"
+      ],
+      "impact": "Promise.race tidak membatalkan cache.add; fallback ke runtime.prepare dapat menjalankan dua writer/transfer ~113 MB bersamaan.",
+      "repair": "Satu primeTask dipertahankan; timeout fail-closed dan retry mengadopsi task yang sama, tidak menjalankan downloader kedua."
+    },
+    {
+      "id": "NV-009",
+      "severity": "HIGH",
+      "status": "FIXED",
+      "title": "Timeout init ONNX membuang task yang masih hidup lalu retry dapat membuat session kedua",
+      "evidence": [
+        "features/neural-voice/fiezel-neural-voice-bootstrap.js",
+        "neural-voice-test.js: late ONNX init gate"
+      ],
+      "impact": "Pada device lambat, init >20s dapat terus berjalan di background sementara retry memulai model/session baru, menambah memory pressure dan membuat neural tidak pernah stabil.",
+      "repair": "Pisahkan backendInitPromise dari caller timeout; hasil terlambat diadopsi, retry tidak menduplikasi model initialization."
+    },
+    {
+      "id": "NV-010",
+      "severity": "CRITICAL",
+      "status": "FIXED",
+      "title": "Service worker merekonstruksi opaque no-cors menjadi 200 body kosong",
+      "evidence": [
+        "sw.js",
+        "sw-corp-test.js",
+        "handoff/HANDOFF-PROMPT.md §M-021"
+      ],
+      "impact": "SDK third-party seperti Puter dapat menjadi script kosong setelah SW mengontrol page, merusak fitur lintas aplikasi dan membuat diagnosis misleading.",
+      "repair": "CORS-first bila readable; bila tidak, pass-through opaque apa adanya; tidak pernah synthesize empty 200."
+    },
+    {
+      "id": "NV-011",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "Aset neural masih satu cache dengan app shell dan terikat FIEZEL_VERSION",
+      "evidence": [
+        "sw.js:2,7-9,79",
+        "features/neural-voice/fiezel-neural-voice-bootstrap.js:8-9",
+        "handoff/HANDOFF-PROMPT.md §1.1, §7"
+      ],
+      "impact": "Bump version dapat menghapus cache ~113 MB dan menghilangkan bukti/device state prepared.",
+      "action": "Pisahkan cache voice atau migrasi IndexedDB hanya setelah device gate; kandidat ini sengaja tidak mengubah version.js/VERSION.json."
+    },
+    {
+      "id": "NV-012",
+      "severity": "BLOCKER",
+      "status": "BLOCKED",
+      "title": "Puter live di bawah COEP belum diverifikasi pada konteks owner",
+      "evidence": [
+        "sw-corp-test.js",
+        "audit/PUTER-COEP-COMPATIBILITY.md",
+        "audit/NEXT-EXECUTION-DEVICE-GATE.md"
+      ],
+      "impact": "Jika upstream script tidak memenuhi CORS/CORP pada request real, COEP dapat tetap memblokir integrasi.",
+      "action": "Catat puterLoaded dan network result dari Diagnostics/device setelah SW candidate aktif."
+    },
+    {
+      "id": "NV-013",
+      "severity": "INFO",
+      "status": "BLOCKED_ENVIRONMENT",
+      "title": "Browser headless audit tidak dapat mengakses localhost",
+      "evidence": [
+        "audit/BROWSER-E2E-BLOCKER.md"
+      ],
+      "impact": "Tidak ada browser/service-worker/audio end-to-end proof dari environment ini.",
+      "action": "Gunakan real-device PWA gate; jangan mengubah BLOCKED menjadi PASS."
+    },
+    {
+      "id": "NV-014",
+      "severity": "INFO",
+      "status": "VERIFIED",
+      "title": "Bundled Kokoro model/WASM dan keenam voice dapat menghasilkan waveform",
+      "evidence": [
+        "audit/KOKORO-INFERENCE-EVIDENCE.md",
+        "artifacts/kokoro-six-voice-inference-result.json"
+      ],
+      "impact": "Menurunkan probabilitas korupsi model/WASM/voice binary sebagai akar utama insiden; fokus tetap pada lifecycle, browser integration, storage, dan audio output.",
+      "action": "Pertahankan inference smoke sebagai gate setelah setiap repair neural."
+    },
+    {
+      "id": "NV-015",
+      "severity": "INFO",
+      "status": "SOURCE_VERIFIED",
+      "title": "Upstream Puter main menyediakan CORP cross-origin dan route js /v2",
+      "evidence": [
+        "audit/PUTER-COEP-COMPATIBILITY.md"
+      ],
+      "impact": "Source upstream konsisten dengan integrasi COEP require-corp, tetapi tidak membuktikan respons CDN live yang diterima owner.",
+      "action": "Tetap wajib verifikasi puterLoaded dan fitur Puter pada PWA owner sebelum rilis."
+    }
   ]
 }
