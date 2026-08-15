@@ -1,0 +1,8 @@
+{
+  "source": "FINAL-AUDIT-REPORT.json",
+  "version": "5.19.0",
+  "status": "PASS",
+  "counts": {"pass":154,"fail":0},
+  "sha256": "146ae2ea1f3a76060e9746d8cd9d9cbe15e3af575043d0ed799b5f58627ac68b",
+  "note": "This is a compact summary of the locally generated aggregate report. The aggregate audit completed with process exit code 0. It does not override blocked physical-device/live-integration gates."
+}
