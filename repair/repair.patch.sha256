@@ -1,2 +1,11 @@
+# Aggregate artifacts
 3e524cfa37fa6ded34413d03ec1bef0e071c1ac4aef4da36d08cdb30baf0f76e  repair.patch
 ca1a1ba775cff188c74a6f1b11ad89263a4e8fc50ef64b4f728ad38ff1b6f870  repair.patch.gz
+
+# Published chunks
+d516e31112cd3e31fbd437303f2d0dbc534dfa18a0ca6815b21e5a0c5160b74f  parts/repair.patch.gz.part00
+f1a8d652fa72a066942c0801d5a9ffe50259a8e38031e28b6a32ea2a23f06e35  parts/repair.patch.gz.part01
+234dc02db2a3cb38a215f1bbf55b3282b952c2da64ea5c2d5d3988a85ff08979  parts/repair.patch.gz.part02
+1448fe0472a8143647dabe7fe5554359e24e0144d4252f40dba1e25cac30e06d  parts/repair.patch.gz.part03
+44cadb94fe46d59216fa345196ef3989c746b77a4474bc16cb038ed4d6365e1c  parts/repair.patch.gz.part04
+e29f1c70d585216c79a6c75add4e2f4a3629df45f5bdb20ee515c54b357fde0d  parts/repair.patch.gz.part05
