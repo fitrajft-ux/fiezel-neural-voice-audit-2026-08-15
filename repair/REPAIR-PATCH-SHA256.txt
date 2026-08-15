@@ -1,0 +1,4 @@
+3e524cfa37fa6ded34413d03ec1bef0e071c1ac4aef4da36d08cdb30baf0f76e  audit/repair.patch
+
+Local patch size: 105,062 bytes (approximately 103 KiB).
+The GitHub audit repository stores reviewable candidate source + repair manifest. This hash identifies the canonical local repair patch derived from the owner-provided ZIP baseline.
