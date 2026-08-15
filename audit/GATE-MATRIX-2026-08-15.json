@@ -1,0 +1,20 @@
+{
+  "schema": "fiezel-audit-gate-matrix-v1",
+  "date": "2026-08-15",
+  "qualitySummary": {"pass": 39, "total": 39, "allPass": true},
+  "qualityGates": [
+    {"gate":"adaptive-policy-test.js","status":"PASS"},{"gate":"ai-integration-test.js","status":"PASS"},{"gate":"alrs-behavior-test.js","status":"PASS"},{"gate":"content-adoption-evidence-test.js","status":"PASS"},{"gate":"content-adoption-rehearsal-test.js","status":"PASS"},{"gate":"content-adoption-test.js","status":"PASS"},{"gate":"content-audit.js","status":"PASS"},{"gate":"content-canary-test.js","status":"PASS"},{"gate":"content-evidence-origin-test.js","status":"PASS"},{"gate":"content-patch-gate-test.js","status":"PASS"},{"gate":"content-promotion-test.js","status":"PASS"},{"gate":"content-qa-agent-test.js","status":"PASS"},{"gate":"content-qa-agent.js","status":"PASS"},{"gate":"core-brain-test.js","status":"PASS"},{"gate":"core-worker-contract-test.js","status":"PASS"},{"gate":"diag-panel-test.js","status":"PASS"},{"gate":"experience-integration-test.js","status":"PASS"},{"gate":"grammar-quality-audit.js","status":"PASS"},{"gate":"http-smoke-test.js","status":"PASS"},{"gate":"ios-cache-compat-test.js","status":"PASS"},{"gate":"ios-wasm-module-test.js","status":"PASS"},{"gate":"learner-evidence-test.js","status":"PASS"},{"gate":"lesson-experience-test.js","status":"PASS"},{"gate":"neural-voice-audibility-test.js","status":"PASS"},{"gate":"neural-voice-fix-test.js","status":"PASS"},{"gate":"neural-voice-http-test.js","status":"PASS"},{"gate":"neural-voice-selector-test.js","status":"PASS"},{"gate":"neural-voice-test.js","status":"PASS"},{"gate":"notification-reminder-test.js","status":"PASS"},{"gate":"policy-outcome-test.js","status":"PASS"},{"gate":"product-audit.js","status":"PASS"},{"gate":"pwa-cache-test.js","status":"PASS"},{"gate":"regression-test.js","status":"PASS"},{"gate":"remote-push-test.js","status":"PASS"},{"gate":"runtime-stage8-test.js","status":"PASS"},{"gate":"speaking-listening-test.js","status":"PASS"},{"gate":"sw-corp-test.js","status":"PASS"},{"gate":"ui-structure-test.js","status":"PASS"},{"gate":"validator.js","status":"PASS"}
+  ],
+  "mandatoryReleaseGates": [
+    {"gate":"root_js_syntax","status":"PASS","detail":"node --check untuk root *.js/*.mjs telah bersih pada sweep final"},
+    {"gate":"neural_js_syntax","status":"PASS","detail":"node --check features/neural-voice/*.js bersih"},
+    {"gate":"broken_pattern_scan","status":"PASS","detail":"grep pola ^\\s*}){ kosong"},
+    {"gate":"version_js_unchanged","status":"PASS","detail":"version.js tetap 5.19.0; tidak dinaikkan"},
+    {"gate":"VERSION_json_unchanged","status":"PASS","detail":"VERSION.json tetap 5.19.0; tidak dinaikkan"},
+    {"gate":"workflow_quality_suite","status":"PASS","detail":"39/39 test workflow PASS"},
+    {"gate":"legacy_release_audit","status":"INCOMPLETE","detail":"Harness stale sudah diperbaiki untuk kontrak baru, tetapi eksekusi agregat belum terminasi dalam 290 detik; 84 check terakhir yang sempat tercetak semuanya PASS. Tidak dihitung PASS."},
+    {"gate":"real_iPhone_PWA","status":"PENDING","detail":"Tidak ada bukti device; source lock menyatakan realDeviceGate=PENDING dan productionClaim=false."}
+  ],
+  "releaseEligible": false,
+  "blockingGates": ["legacy_release_audit:INCOMPLETE","real_iPhone_PWA:PENDING"]
+}
